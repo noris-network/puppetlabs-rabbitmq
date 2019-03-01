@@ -222,6 +222,8 @@ class rabbitmq::config {
 
   if $erlang_cookie == undef and $config_cluster {
     fail('You must set the $erlang_cookie value in order to configure clustering.')
+  } elsif $erlang_cookie == '' {
+    notice('Empty erlang_cookie - will not create .erlang.cookie-file')
   } elsif $erlang_cookie != undef {
     rabbitmq_erlang_cookie { "${rabbitmq_home}/.erlang.cookie":
       content        => $erlang_cookie,
