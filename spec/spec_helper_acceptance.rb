@@ -1,4 +1,5 @@
 require 'beaker-rspec'
+require 'beaker-puppet'
 require 'beaker/puppet_install_helper'
 require 'beaker/module_install_helper'
 
@@ -9,7 +10,7 @@ install_module
 install_module_dependencies
 
 # Install aditional modules for soft deps
-install_module_from_forge('puppetlabs-apt', '>= 4.1.0 < 5.0.0') if fact('os.family') == 'Debian'
+install_module_from_forge('puppetlabs-apt', '>= 4.1.0 < 7.0.0') if fact('os.family') == 'Debian'
 install_module_from_forge('garethr-erlang', '>= 0.3.0 < 1.0.0') if fact('os.family') == 'RedHat'
 
 RSpec.configure do |c|
@@ -17,6 +18,7 @@ RSpec.configure do |c|
   c.formatter = :documentation
   c.before :suite do
     hosts.each do |host|
+      install_package(host, 'iproute2') if fact('os.release.major').to_i == 18 || fact('os.release.major') == 'buster/sid'
       if fact('os.family') == 'RedHat' && fact('selinux') == 'true'
         # Make sure selinux is disabled so the tests work.
         on host, puppet('apply', '-e',

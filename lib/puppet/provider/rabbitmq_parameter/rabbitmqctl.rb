@@ -1,9 +1,9 @@
 require 'json'
 require 'puppet/util/package'
 
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'rabbitmqctl'))
-Puppet::Type.type(:rabbitmq_parameter).provide(:rabbitmqctl, parent: Puppet::Provider::Rabbitmqctl) do
-  defaultfor feature: :posix
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'rabbitmq_cli'))
+Puppet::Type.type(:rabbitmq_parameter).provide(:rabbitmqctl, parent: Puppet::Provider::RabbitmqCli) do
+  confine feature: :posix
 
   # cache parameters
   def self.parameters(name, vhost)
@@ -11,7 +11,7 @@ Puppet::Type.type(:rabbitmq_parameter).provide(:rabbitmqctl, parent: Puppet::Pro
     unless @parameters[vhost]
       @parameters[vhost] = {}
       parameter_list = run_with_retries do
-        rabbitmqctl('list_parameters', '-q', '-p', vhost)
+        rabbitmqctl_list('parameters', '-p', vhost)
       end
       parameter_list.split(%r{\n}).each do |line|
         raise Puppet::Error, "cannot parse line from list_parameter:#{line}" unless line =~ %r{^(\S+)\s+(\S+)\s+(\S+)$}

@@ -1,17 +1,8 @@
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'rabbitmqctl'))
-Puppet::Type.type(:rabbitmq_plugin).provide(:rabbitmqplugins, parent: Puppet::Provider::Rabbitmqctl) do
-  # Prefer rabbitmq-plugins if it's in $PATH, but fall back to /usr/lib/rabbitmq/bin
-  if Puppet::Util.which('rabbitmq-plugins')
-    has_command(:rabbitmqplugins, 'rabbitmq-plugins') do
-      environment HOME: '/tmp'
-    end
-  else
-    has_command(:rabbitmqplugins, '/usr/lib/rabbitmq/bin/rabbitmq-plugins') do
-      environment HOME: '/tmp'
-    end
-  end
+require 'puppet/util/package'
 
-  defaultfor feature: :posix
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'rabbitmq_cli'))
+Puppet::Type.type(:rabbitmq_plugin).provide(:rabbitmqplugins, parent: Puppet::Provider::RabbitmqCli) do
+  confine feature: :posix
 
   def self.instances
     plugin_list = run_with_retries do
@@ -25,10 +16,14 @@ Puppet::Type.type(:rabbitmq_plugin).provide(:rabbitmqplugins, parent: Puppet::Pr
   end
 
   def create
+    cmd = ['enable', resource[:name]]
+    # rabbitmq>=3.4.0 - check if node running, if not, ignore this option
+    cmd << "--#{resource[:mode]}" if self.class.rabbitmq_running && Puppet::Util::Package.versioncmp(self.class.rabbitmq_version, '3.4') >= 0 && resource[:mode] != :best
+
     if resource[:umask].nil?
-      rabbitmqplugins('enable', resource[:name])
+      rabbitmqplugins(*cmd)
     else
-      Puppet::Util.withumask(resource[:umask]) { rabbitmqplugins('enable', resource[:name]) }
+      Puppet::Util.withumask(resource[:umask]) { rabbitmqplugins(*cmd) }
     end
   end
 
@@ -37,6 +32,6 @@ Puppet::Type.type(:rabbitmq_plugin).provide(:rabbitmqplugins, parent: Puppet::Pr
   end
 
   def exists?
-    self.class.run_with_retries { rabbitmqplugins('list', '-E', '-m') }.split(%r{\n}).include? resource[:name]
+    run_with_retries { rabbitmqplugins('list', '-E', '-m') }.split(%r{\n}).include? resource[:name]
   end
 end

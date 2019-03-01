@@ -8,6 +8,7 @@
 <%- if @heartbeat -%>
     {heartbeat, <%=@heartbeat%>},
 <% end -%>
+    {loopback_users, [<%= @loopback_users.map { |u| "<<\"#{u}\">>" }.join(', ') %>]},
 <% if @auth_backends -%>
     {auth_backends, [<%= @auth_backends.map { |v| "#{v}" }.join(', ') %>]},
 <% elsif @ldap_auth -%>
@@ -95,12 +96,12 @@
     <%= @config_kernel_variables.sort.map{|k,v| "{#{k}, #{v}}"}.join(",\n    ") %>
   ]}
 <%- end -%>
-<%- if @admin_enable or !@config_management_variables.empty? -%>,
+<%- if @admin_enable or @management_enable or !@config_management_variables.empty? -%>,
   {rabbitmq_management, [
     <%- if !@config_management_variables.empty? -%>
     <%= @config_management_variables.sort.map{|k,v| "{#{k}, #{v}}"}.join(",\n    ") %>
     <%- end -%>
-<%- if @admin_enable -%>
+<%- if @admin_enable or @management_enable -%>
 <%- if  !@config_management_variables.empty? -%>,<%-end-%>
     {listener, [
 <%- if @ssl && @management_ssl -%>
@@ -113,7 +114,9 @@
                   {cacertfile, "<%= @ssl_cacert %>"},
                   <%- end -%>
                   {certfile, "<%= @ssl_cert %>"},
-                  {keyfile, "<%= @ssl_key %>"}
+                  {keyfile, "<%= @ssl_key %>"},
+                  {verify,<%= @ssl_management_verify %>},
+                  {fail_if_no_peer_cert,<%= @ssl_management_fail_if_no_peer_cert %>}
                    <%- if @ssl_versions -%>
                      ,{versions, [<%= @ssl_versions.sort.map { |v| "'#{v}'" }.join(', ') %>]}
                    <%- end -%>

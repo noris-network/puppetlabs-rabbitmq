@@ -13,24 +13,30 @@ describe 'rabbitmq' do
     end
   end
 
-  # TODO: get Archlinux & OpenBSD facts from facterdb
-
   on_supported_os.each do |os, facts|
     context "on #{os}" do
-      let(:facts) { facts }
+      systemd_facts = os_specific_facts(facts)
+      facts = facts.merge(systemd_facts)
+      let :facts do
+        facts
+      end
 
-      has_systemd = (
-        (facts[:os]['family'] == 'RedHat' && facts[:os]['release']['major'].to_i >= 7) ||
-        (facts[:os]['family'] == 'Debian' && facts[:os]['release']['full'] == '16.04') ||
-        (facts[:os]['family'] == 'Archlinux')
-      )
+      name = case facts[:osfamily]
+             when 'Archlinux', 'OpenBSD', 'FreeBSD'
+               'rabbitmq'
+             else
+               'rabbitmq-server'
+             end
 
       it { is_expected.to compile.with_all_deps }
       it { is_expected.to contain_class('rabbitmq::install') }
-      it { is_expected.to contain_class('rabbitmq::config') }
+      it { is_expected.to contain_class('rabbitmq::config').that_notifies('Class[rabbitmq::service]') }
       it { is_expected.to contain_class('rabbitmq::service') }
 
-      it { is_expected.to contain_package('rabbitmq-server').with_ensure('installed').with_name('rabbitmq-server') }
+      it { is_expected.to contain_package(name).with_ensure('installed').with_name(name) }
+      if facts[:os]['family'] == 'Suse'
+        it { is_expected.to contain_package('rabbitmq-server-plugins') }
+      end
 
       context 'with default params' do
         it { is_expected.not_to contain_class('rabbitmq::repo::apt') }
@@ -39,13 +45,19 @@ describe 'rabbitmq' do
         it { is_expected.not_to contain_yumrepo('rabbitmq') }
       end
 
+      context 'with service_restart => false' do
+        let(:params) { { service_restart: false } }
+
+        it { is_expected.not_to contain_class('rabbitmq::config').that_notifies('Class[rabbitmq::service]') }
+      end
+
       context 'with repos_ensure => true' do
         let(:params) { { repos_ensure: true } }
 
         if facts[:os]['family'] == 'Debian'
           it 'includes rabbitmq::repo::apt' do
             is_expected.to contain_class('rabbitmq::repo::apt').
-              with_key_source('https://packagecloud.io/gpg.key').
+              with_key_source('https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey').
               with_key_content(nil)
           end
 
@@ -79,12 +91,18 @@ describe 'rabbitmq' do
       context 'with no pin', if: facts[:os]['family'] == 'Debian' do
         let(:params) { { repos_ensure: true, package_apt_pin: '' } }
 
+        if Puppet.version =~ %r{^6} # https://tickets.puppetlabs.com/browse/PUP-9112 and https://tickets.puppetlabs.com/browse/PUP-9180
+          let(:expected_key_apt_source_key_content) { 'nil' }
+        else
+          let(:expected_key_apt_source_key_content) { ':undef' }
+        end
+
         describe 'it sets up an apt::source' do
           it {
             is_expected.to contain_apt__source('rabbitmq').with(
               'location'    => "https://packagecloud.io/rabbitmq/rabbitmq-server/#{facts[:os]['name'].downcase}",
               'repos'       => 'main',
-              'key'         => '{"id"=>"418A7F2FB0E1E6E7EABF6FE8C2E73424D59097AB", "source"=>"https://packagecloud.io/gpg.key", "content"=>:undef}'
+              'key'         => "{\"id\"=>\"8C695B0219AFDEB04A058ED8F4E789204D206F89\", \"source\"=>\"https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey\", \"content\"=>#{expected_key_apt_source_key_content}}"
             )
           }
         end
@@ -93,12 +111,18 @@ describe 'rabbitmq' do
       context 'with pin', if: facts[:os]['family'] == 'Debian' do
         let(:params) { { repos_ensure: true, package_apt_pin: '700' } }
 
+        if Puppet.version =~ %r{^6} # https://tickets.puppetlabs.com/browse/PUP-9112 and https://tickets.puppetlabs.com/browse/PUP-9180
+          let(:expected_key_apt_source_key_content) { 'nil' }
+        else
+          let(:expected_key_apt_source_key_content) { ':undef' }
+        end
+
         describe 'it sets up an apt::source and pin' do
           it {
             is_expected.to contain_apt__source('rabbitmq').with(
               'location'    => "https://packagecloud.io/rabbitmq/rabbitmq-server/#{facts[:os]['name'].downcase}",
               'repos'       => 'main',
-              'key'         => '{"id"=>"418A7F2FB0E1E6E7EABF6FE8C2E73424D59097AB", "source"=>"https://packagecloud.io/gpg.key", "content"=>:undef}'
+              'key'         => "{\"id\"=>\"8C695B0219AFDEB04A058ED8F4E789204D206F89\", \"source\"=>\"https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey\", \"content\"=>#{expected_key_apt_source_key_content}}"
             )
           }
 
@@ -112,7 +136,7 @@ describe 'rabbitmq' do
         end
       end
 
-      ['unlimited', 'infinity', -1, 1234].each do |value|
+      ['infinity', -1, 1234].each do |value|
         context "with file_limit => '#{value}'" do
           let(:params) { { file_limit: value } }
 
@@ -135,22 +159,19 @@ describe 'rabbitmq' do
             it { is_expected.not_to contain_file('/etc/default/rabbitmq-server') }
           end
 
-          if has_systemd
+          if facts[:systemd]
             it do
-              is_expected.to contain_file('/etc/systemd/system/rabbitmq-server.service.d/limits.conf').
-                with_owner('0').
-                with_group('0').
-                with_mode('0644').
-                that_notifies('Exec[rabbitmq-systemd-reload]').
-                with_content("[Service]\nLimitNOFILE=#{value}\n")
+              is_expected.to contain_systemd__service_limits("#{name}.service").
+                with_limits('LimitNOFILE' => value).
+                with_restart_service(false)
             end
           else
-            it { is_expected.not_to contain_file('/etc/systemd/system/rabbitmq-server.service.d/limits.conf') }
+            it { is_expected.not_to contain_systemd__service_limits("#{name}.service") }
           end
         end
       end
 
-      [-42, '-42', 'foo', '42'].each do |value|
+      [-42, '-42', 'foo'].each do |value|
         context "with file_limit => '#{value}'" do
           let(:params) { { file_limit: value } }
 
@@ -160,32 +181,15 @@ describe 'rabbitmq' do
         end
       end
 
-      context 'on systems with systemd', if: has_systemd do
-        it {
-          is_expected.to contain_file('/etc/systemd/system/rabbitmq-server.service.d').with(
-            'ensure'                  => 'directory',
-            'owner'                   => '0',
-            'group'                   => '0',
-            'mode'                    => '0755',
-            'selinux_ignore_defaults' => true
-          )
-        }
-
-        it { is_expected.to contain_file('/etc/systemd/system/rabbitmq-server.service.d/limits.conf') }
-
-        it {
-          is_expected.to contain_exec('rabbitmq-systemd-reload').with(
-            command: '/bin/systemctl daemon-reload',
-            notify: 'Class[Rabbitmq::Service]',
-            refreshonly: true
-          )
-        }
+      context 'on systems with systemd', if: facts[:systemd] do
+        it do
+          is_expected.to contain_systemd__service_limits("#{name}.service").
+            with_restart_service(false)
+        end
       end
 
-      context 'on systems without systemd', unless: has_systemd do
-        it { is_expected.not_to contain_file('/etc/systemd/system/rabbitmq-server.service.d') }
-        it { is_expected.not_to contain_file('/etc/systemd/system/rabbitmq-server.service.d/limits.conf') }
-        it { is_expected.not_to contain_exec('rabbitmq-systemd-reload') }
+      context 'on systems without systemd', unless: facts[:systemd] do
+        it { is_expected.not_to contain_systemd__service_limits("#{name}.service") }
       end
 
       context 'with admin_enable set to true' do
@@ -205,18 +209,19 @@ describe 'rabbitmq' do
             it 'installs a package called rabbitmqadmin' do
               is_expected.to contain_package('rabbitmqadmin').with_name('rabbitmqadmin')
             end
-          end
-          it 'we enable the admin interface by default' do
-            is_expected.to contain_class('rabbitmq::install::rabbitmqadmin')
-            is_expected.to contain_rabbitmq_plugin('rabbitmq_management').with(
-              notify: 'Class[Rabbitmq::Service]'
-            )
-            is_expected.to contain_archive('rabbitmqadmin').with_source('http://1.1.1.1:15672/cli/rabbitmqadmin')
+          else
+            it 'we enable the admin interface by default' do
+              is_expected.to contain_class('rabbitmq::install::rabbitmqadmin')
+              is_expected.to contain_rabbitmq_plugin('rabbitmq_management').with(
+                notify: 'Class[Rabbitmq::Service]'
+              )
+              is_expected.to contain_archive('rabbitmqadmin').with_source('http://1.1.1.1:15672/cli/rabbitmqadmin')
+            end
           end
           if %w[RedHat Debian SUSE].include?(facts[:os]['family'])
             it { is_expected.to contain_package('python') }
           end
-          if %w[Archlinux FreeBSD OpenBSD].include?(facts[:os]['family'])
+          if %w[FreeBSD OpenBSD].include?(facts[:os]['family'])
             it { is_expected.to contain_package('python2') }
           end
         end
@@ -230,7 +235,7 @@ describe 'rabbitmq' do
           end
         end
 
-        context 'with $management_ip_address undef and service_manage set to true' do
+        context 'with $management_ip_address undef and service_manage set to true', unless: facts[:osfamily] == 'Archlinux' do
           let(:params) { { admin_enable: true, management_ip_address: :undef } }
 
           it 'we enable the admin interface by default' do
@@ -241,7 +246,7 @@ describe 'rabbitmq' do
             is_expected.to contain_archive('rabbitmqadmin').with_source('http://127.0.0.1:15672/cli/rabbitmqadmin')
           end
         end
-        context 'with service_manage set to true, node_ip_address = undef, and default user/pass specified' do
+        context 'with service_manage set to true, node_ip_address = undef, and default user/pass specified', unless: facts[:osfamily] == 'Archlinux' do
           let(:params) { { admin_enable: true, default_user: 'foobar', default_pass: 'hunter2', node_ip_address: :undef } }
 
           it 'we use the correct URL to rabbitmqadmin' do
@@ -252,7 +257,7 @@ describe 'rabbitmq' do
             )
           end
         end
-        context 'with service_manage set to true and default user/pass specified' do
+        context 'with service_manage set to true and default user/pass specified', unless: facts[:osfamily] == 'Archlinux' do
           let(:params) { { admin_enable: true, default_user: 'foobar', default_pass: 'hunter2', management_ip_address: '1.1.1.1' } }
 
           it 'we use the correct URL to rabbitmqadmin' do
@@ -263,7 +268,23 @@ describe 'rabbitmq' do
             )
           end
         end
-        context 'with service_manage set to true and management port specified' do
+        context 'with service_manage set to true and archive_options set', unless: facts[:osfamily] == 'Archlinux' do
+          let(:params) do
+            {
+              admin_enable: true,
+              management_ip_address: '1.1.1.1',
+              archive_options: %w[fizz pop]
+            }
+          end
+
+          it 'we use the correct archive_options to rabbitmqadmin' do
+            is_expected.to contain_archive('rabbitmqadmin').with(
+              source: 'http://1.1.1.1:15672/cli/rabbitmqadmin',
+              download_options: %w[fizz pop]
+            )
+          end
+        end
+        context 'with service_manage set to true and management port specified', unless: facts[:osfamily] == 'Archlinux' do
           # note that the 2.x management port is 55672 not 15672
           let(:params) { { admin_enable: true, management_port: 55_672, management_ip_address: '1.1.1.1' } }
 
@@ -275,7 +296,7 @@ describe 'rabbitmq' do
             )
           end
         end
-        context 'with ipv6, service_manage set to true and management port specified' do
+        context 'with ipv6, service_manage set to true and management port specified', unless: facts[:osfamily] == 'Archlinux' do
           # note that the 2.x management port is 55672 not 15672
           let(:params) { { admin_enable: true, management_port: 55_672, management_ip_address: '::1' } }
 
@@ -591,6 +612,99 @@ describe 'rabbitmq' do
         it 'contains auth_backends' do
           verify_contents(catalogue, 'rabbitmq.config',
                           ['    {auth_backends, [{baz, foo}, bar]},'])
+        end
+      end
+
+      context 'use config file for plugins' do
+        describe 'config_plugins_file: true' do
+          let :params do
+            { use_config_file_for_plugins: true }
+          end
+
+          it 'does not use rabbitmqplugin provider' do
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_management')
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_shovel_management')
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_stomp')
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_auth_backend_ldap')
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_shovel')
+          end
+
+          it 'configures enabled_plugins' do
+            is_expected.to contain_file('enabled_plugins').with_content(%r{\[rabbitmq_management\]\.})
+          end
+        end
+
+        describe 'with all plugins enabled admin_enable: false, manamgent_enable: true' do
+          let :params do
+            {
+              use_config_file_for_plugins: true,
+              admin_enable: false,
+              management_enable: true,
+              stomp_ensure: true,
+              ldap_auth: true,
+              config_shovel: true
+            }
+          end
+
+          it 'does not use rabbitmqplugin provider' do
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_management')
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_shovel_management')
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_stomp')
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_auth_backend_ldap')
+            is_expected.not_to contain_rabbitmq_plugin('rabbitmq_shovel')
+          end
+
+          it 'configures enabled_plugins' do
+            is_expected.to contain_file('enabled_plugins').with_content(%r{rabbitmq_management})
+            is_expected.to contain_file('enabled_plugins').with_content(%r{rabbitmq_stomp})
+            is_expected.to contain_file('enabled_plugins').with_content(%r{rabbitmq_auth_backend_ldap})
+            is_expected.to contain_file('enabled_plugins').with_content(%r{rabbitmq_shovel})
+            is_expected.to contain_file('enabled_plugins').with_content(%r{rabbitmq_shovel_management})
+            is_expected.to contain_file('enabled_plugins').with_content(%r{\[rabbitmq_management,rabbitmq_stomp,rabbitmq_auth_backend_ldap,rabbitmq_shovel,rabbitmq_shovel_management\]\.})
+          end
+        end
+      end
+
+      describe 'configure management plugin' do
+        let :params do
+          {
+            admin_enable: true,
+            management_enable: false
+          }
+        end
+
+        it { is_expected.to contain_rabbitmq_plugin('rabbitmq_management') }
+        it 'sets rabbitmq_managment opts to specified values' do
+          is_expected.to contain_file('rabbitmq.config').with_content(%r{rabbitmq_management, \[})
+          is_expected.to contain_file('rabbitmq.config').with_content(%r{listener, \[})
+          is_expected.to contain_file('rabbitmq.config').with_content(%r{port, 15672\}})
+        end
+
+        describe 'with admin_enable false' do
+          let :params do
+            {
+              admin_enable: false,
+              management_enable: false
+            }
+          end
+
+          it { is_expected.not_to contain_rabbitmq_plugin('rabbitmq_management') }
+        end
+
+        describe 'with admin_enable false and management_enable true' do
+          let :params do
+            {
+              admin_enable: false,
+              management_enable: true
+            }
+          end
+
+          it { is_expected.to contain_rabbitmq_plugin('rabbitmq_management') }
+          it 'sets rabbitmq_managment opts to specified values' do
+            is_expected.to contain_file('rabbitmq.config').with_content(%r{rabbitmq_management, \[})
+            is_expected.to contain_file('rabbitmq.config').with_content(%r{listener, \[})
+            is_expected.to contain_file('rabbitmq.config').with_content(%r{port, 15672\}})
+          end
         end
       end
 
@@ -1083,6 +1197,8 @@ describe 'rabbitmq' do
             ssl_cacert: '/path/to/cacert',
             ssl_cert: '/path/to/cert',
             ssl_key: '/path/to/key',
+            ssl_management_verify: 'verify_peer',
+            ssl_management_fail_if_no_peer_cert: true,
             admin_enable: true }
         end
 
@@ -1092,6 +1208,8 @@ describe 'rabbitmq' do
           is_expected.to contain_file('rabbitmq.config').with_content(%r{port, 3141\}})
           is_expected.to contain_file('rabbitmq.config').with_content(%r{ssl, true\}})
           is_expected.to contain_file('rabbitmq.config').with_content(%r{ssl_opts, \[})
+          is_expected.to contain_file('rabbitmq.config').with_content(%r{verify,verify_peer\},})
+          is_expected.to contain_file('rabbitmq.config').with_content(%r{fail_if_no_peer_cert,true\}})
           is_expected.to contain_file('rabbitmq.config').with_content(%r{cacertfile, "/path/to/cacert"\},})
           is_expected.to contain_file('rabbitmq.config').with_content(%r{certfile, "/path/to/cert"\},})
           is_expected.to contain_file('rabbitmq.config').with_content(%r{keyfile, "/path/to/key"\}})
@@ -1381,6 +1499,31 @@ describe 'rabbitmq' do
         end
       end
 
+      describe 'rabbitmq-loopback_users by default' do
+        it 'sets the loopback_users parameter in the config file' do
+          is_expected.to contain_file('rabbitmq.config'). \
+            with_content(%r{\{loopback_users, \[<<"guest">>\]\}})
+        end
+      end
+
+      describe 'rabbitmq-loopback_users allow connections via loopback interfaces' do
+        let(:params) { { loopback_users: [] } }
+
+        it 'sets the loopback_users parameter in the config file' do
+          is_expected.to contain_file('rabbitmq.config'). \
+            with_content(%r{\{loopback_users, \[\]\}})
+        end
+      end
+
+      describe 'rabbitmq-loopback_users allow connections via loopback interfaces to a group of users' do
+        let(:params) { { loopback_users: %w[user1 user2] } }
+
+        it 'sets the loopback_users parameter in the config file' do
+          is_expected.to contain_file('rabbitmq.config'). \
+            with_content(%r{\{loopback_users, \[<<\"user1\">>, <<\"user2\">>\]\}})
+        end
+      end
+
       ##
       ## rabbitmq::service
       ##
@@ -1390,9 +1533,17 @@ describe 'rabbitmq' do
             'ensure'     => 'running',
             'enable'     => 'true',
             'hasstatus'  => 'true',
-            'hasrestart' => 'true'
+            'hasrestart' => 'true',
+            'name'       => name
           )
         }
+      end
+
+      context 'on systems with systemd', if: facts[:systemd] do
+        it do
+          is_expected.to contain_service('rabbitmq-server').
+            that_requires('Class[systemd::systemctl::daemon_reload]')
+        end
       end
 
       describe 'service with ensure stopped' do

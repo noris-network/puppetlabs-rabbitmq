@@ -4,7 +4,191 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
-## [v8.0.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.0.0) (2017-10-19)
+## [v9.0.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v9.0.0) (2019-01-29)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v8.5.0...v9.0.0)
+
+**Breaking changes:**
+
+- modulesync 2.5.1 and drop Puppet4 [\#761](https://github.com/voxpupuli/puppet-rabbitmq/pull/761) ([bastelfreak](https://github.com/bastelfreak))
+
+**Implemented enhancements:**
+
+- Allow offline and online mode for plugins [\#765](https://github.com/voxpupuli/puppet-rabbitmq/pull/765) ([ahmet2mir](https://github.com/ahmet2mir))
+
+## [v8.5.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.5.0) (2019-01-25)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v8.4.1...v8.5.0)
+
+**Implemented enhancements:**
+
+- Officially support Ubuntu 18.04 [\#758](https://github.com/voxpupuli/puppet-rabbitmq/pull/758) ([baurmatt](https://github.com/baurmatt))
+
+**Fixed bugs:**
+
+- rabbitmqctl -q status fails [\#763](https://github.com/voxpupuli/puppet-rabbitmq/issues/763)
+- Wrong rabbitmq-plugins command is used installing plugins [\#748](https://github.com/voxpupuli/puppet-rabbitmq/issues/748)
+- Error 765 after latest update [\#741](https://github.com/voxpupuli/puppet-rabbitmq/issues/741)
+- rabbitmqctl 'broken' in 3.7.9 [\#740](https://github.com/voxpupuli/puppet-rabbitmq/issues/740)
+- Override the PATH for providers to include /usr/lib/rabbitmq/bin [\#766](https://github.com/voxpupuli/puppet-rabbitmq/pull/766) ([JayH5](https://github.com/JayH5))
+- RabbitMQ 3.7.9+ list compatibility and provider cleanup [\#759](https://github.com/voxpupuli/puppet-rabbitmq/pull/759) ([JayH5](https://github.com/JayH5))
+
+**Closed issues:**
+
+- Officially support Ubuntu 18.04 [\#757](https://github.com/voxpupuli/puppet-rabbitmq/issues/757)
+
+**Merged pull requests:**
+
+- Make Ubuntu 18.04 persistent for modulesync [\#767](https://github.com/voxpupuli/puppet-rabbitmq/pull/767) ([baurmatt](https://github.com/baurmatt))
+- Remove trailing whitespace in HISTORY [\#762](https://github.com/voxpupuli/puppet-rabbitmq/pull/762) ([wyardley](https://github.com/wyardley))
+
+## [v8.4.1](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.4.1) (2018-12-08)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v8.4.0...v8.4.1)
+
+**Fixed bugs:**
+
+- Update APT GPG Key [\#743](https://github.com/voxpupuli/puppet-rabbitmq/pull/743) ([Mezzle](https://github.com/Mezzle))
+
+**Closed issues:**
+
+- Package cloud APT GPG key changed? [\#742](https://github.com/voxpupuli/puppet-rabbitmq/issues/742)
+
+**Merged pull requests:**
+
+- Remove duplicated / outdated docs in README [\#747](https://github.com/voxpupuli/puppet-rabbitmq/pull/747) ([wyardley](https://github.com/wyardley))
+- Updates to rabbitmq::server docs [\#745](https://github.com/voxpupuli/puppet-rabbitmq/pull/745) ([wyardley](https://github.com/wyardley))
+- Update REFERENCE.md, remove docs dir from master [\#744](https://github.com/voxpupuli/puppet-rabbitmq/pull/744) ([wyardley](https://github.com/wyardley))
+- Replace is\_ipv6\_address with Puppet 4 native comparision [\#738](https://github.com/voxpupuli/puppet-rabbitmq/pull/738) ([baurmatt](https://github.com/baurmatt))
+- modulesync 2.2.0 and allow puppet 6.x [\#735](https://github.com/voxpupuli/puppet-rabbitmq/pull/735) ([bastelfreak](https://github.com/bastelfreak))
+
+## [v8.4.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.4.0) (2018-10-04)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v8.3.0...v8.4.0)
+
+**Implemented enhancements:**
+
+- Make restarting services optional [\#727](https://github.com/voxpupuli/puppet-rabbitmq/issues/727)
+- Add service\_restart option to prevent automatic service reload [\#728](https://github.com/voxpupuli/puppet-rabbitmq/pull/728) ([spuder](https://github.com/spuder))
+
+**Fixed bugs:**
+
+- Fix service name in systemd service limits config [\#726](https://github.com/voxpupuli/puppet-rabbitmq/pull/726) ([JayH5](https://github.com/JayH5))
+
+**Closed issues:**
+
+- Allow Puppet 6.X [\#733](https://github.com/voxpupuli/puppet-rabbitmq/issues/733)
+- tcp\_listen\_options is causing clients not to be able to connect [\#719](https://github.com/voxpupuli/puppet-rabbitmq/issues/719)
+
+**Merged pull requests:**
+
+- Add docs for config\_ranch parameter [\#725](https://github.com/voxpupuli/puppet-rabbitmq/pull/725) ([wyardley](https://github.com/wyardley))
+
+## [v8.3.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.3.0) (2018-09-05)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v8.2.2...v8.3.0)
+
+**Implemented enhancements:**
+
+- Add loopback\_users parameter \(adds ability to allow guest user to login remotely\) [\#699](https://github.com/voxpupuli/puppet-rabbitmq/pull/699) ([jjuarez](https://github.com/jjuarez))
+
+**Fixed bugs:**
+
+- no parameter named 'download\_option'  [\#706](https://github.com/voxpupuli/puppet-rabbitmq/issues/706)
+- Some boolean properties were being ignored when `false`. [\#712](https://github.com/voxpupuli/puppet-rabbitmq/pull/712) ([orium](https://github.com/orium))
+
+**Closed issues:**
+
+- rabbitmq\_version fact fails on Ubuntu 18.04 [\#704](https://github.com/voxpupuli/puppet-rabbitmq/issues/704)
+- Allow the remote connections with the guest user [\#698](https://github.com/voxpupuli/puppet-rabbitmq/issues/698)
+
+**Merged pull requests:**
+
+- Set lower limit for puppet-archive to 2.0.0 [\#721](https://github.com/voxpupuli/puppet-rabbitmq/pull/721) ([wyardley](https://github.com/wyardley))
+- Enable acceptance tests; Add debian 9 support [\#720](https://github.com/voxpupuli/puppet-rabbitmq/pull/720) ([bastelfreak](https://github.com/bastelfreak))
+- allow puppetlabs/stdlib 5.x, puppet/archive 3.x and puppetlabs/apt 6.x [\#716](https://github.com/voxpupuli/puppet-rabbitmq/pull/716) ([bastelfreak](https://github.com/bastelfreak))
+- Rebase of \#683 / mock systemd fact properly [\#715](https://github.com/voxpupuli/puppet-rabbitmq/pull/715) ([bastelfreak](https://github.com/bastelfreak))
+- Fixing puppet apt module requirement to \< 6.0.0 [\#714](https://github.com/voxpupuli/puppet-rabbitmq/pull/714) ([meltingrobot](https://github.com/meltingrobot))
+- Updated comment symbol on inetrc.erb [\#709](https://github.com/voxpupuli/puppet-rabbitmq/pull/709) ([covidium](https://github.com/covidium))
+- Ensure version fact does not throw an error for invalid match [\#705](https://github.com/voxpupuli/puppet-rabbitmq/pull/705) ([CTrox](https://github.com/CTrox))
+- Rely on beaker-hostgenerator for docker nodesets [\#702](https://github.com/voxpupuli/puppet-rabbitmq/pull/702) ([ekohl](https://github.com/ekohl))
+
+## [v8.2.2](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.2.2) (2018-04-11)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v8.2.1...v8.2.2)
+
+**Fixed bugs:**
+
+- rabbitmq\_user\_permissions timing out [\#689](https://github.com/voxpupuli/puppet-rabbitmq/issues/689)
+- Set default LC\_ALL =\> en\_US.UTF-8 \(\#671, \#689\) [\#694](https://github.com/voxpupuli/puppet-rabbitmq/pull/694) ([wyardley](https://github.com/wyardley))
+
+**Closed issues:**
+
+- not working with rabbitmq-server 3.7 - Cannot parse invalid user line [\#671](https://github.com/voxpupuli/puppet-rabbitmq/issues/671)
+
+## [v8.2.1](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.2.1) (2018-04-03)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v8.2.0...v8.2.1)
+
+**Fixed bugs:**
+
+- Explicitly set LC\_ALL to C \(\#689\) [\#690](https://github.com/voxpupuli/puppet-rabbitmq/pull/690) ([wyardley](https://github.com/wyardley))
+
+**Merged pull requests:**
+
+- bump puppet to latest supported version 4.10.0 [\#692](https://github.com/voxpupuli/puppet-rabbitmq/pull/692) ([bastelfreak](https://github.com/bastelfreak))
+
+## [v8.2.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.2.0) (2018-03-24)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v8.1.0...v8.2.0)
+
+**Implemented enhancements:**
+
+- Add archive\_options parameter for Archive download of rabbitmqadmin [\#681](https://github.com/voxpupuli/puppet-rabbitmq/pull/681) ([paebersold](https://github.com/paebersold))
+
+**Fixed bugs:**
+
+- puppet package install error when running on SLES 12 [\#684](https://github.com/voxpupuli/puppet-rabbitmq/issues/684)
+- Allow dash as valid character for regex [\#687](https://github.com/voxpupuli/puppet-rabbitmq/pull/687) ([crazymind1337](https://github.com/crazymind1337))
+- Install package via title, not name \(\#684\) [\#686](https://github.com/voxpupuli/puppet-rabbitmq/pull/686) ([wyardley](https://github.com/wyardley))
+
+**Closed issues:**
+
+- Failure to install rabbitmq admin via curl when proxy set [\#663](https://github.com/voxpupuli/puppet-rabbitmq/issues/663)
+
+**Merged pull requests:**
+
+- Fixes for Archlinux and modulesync 1.8 [\#685](https://github.com/voxpupuli/puppet-rabbitmq/pull/685) ([bastelfreak](https://github.com/bastelfreak))
+
+## [v8.1.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.1.0) (2018-01-11)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v8.0.0...v8.1.0)
+
+**Implemented enhancements:**
+
+- Add options for ssl verify and 'fail\_if\_no\_peer\_cert' for the managem… [\#657](https://github.com/voxpupuli/puppet-rabbitmq/pull/657) ([paebersold](https://github.com/paebersold))
+- add ability to have array as package name [\#656](https://github.com/voxpupuli/puppet-rabbitmq/pull/656) ([tampakrap](https://github.com/tampakrap))
+
+**Fixed bugs:**
+
+- Support policy format change in v3.7.0 - \#671 \(Replaces \#674\) [\#676](https://github.com/voxpupuli/puppet-rabbitmq/pull/676) ([fatmcgav](https://github.com/fatmcgav))
+- Remove `archive require` in rabbitmqadmin class [\#669](https://github.com/voxpupuli/puppet-rabbitmq/pull/669) ([lzecca78](https://github.com/lzecca78))
+
+**Closed issues:**
+
+- Rabbitmq crashing with config\_ranch = true [\#668](https://github.com/voxpupuli/puppet-rabbitmq/issues/668)
+- puppet/rabbitmq 8.0.0 - /etc/apt/sources.list.d/rabbitmq.list not updated/created [\#662](https://github.com/voxpupuli/puppet-rabbitmq/issues/662)
+- rabbitmqadmin install has no way of continuing to use staging in environments using an incompatible archive module [\#659](https://github.com/voxpupuli/puppet-rabbitmq/issues/659)
+- RabbitMQ Admin Package should work with Puppet-Archive module, or explicitly depend on camptocamp's archive module [\#658](https://github.com/voxpupuli/puppet-rabbitmq/issues/658)
+
+**Merged pull requests:**
+
+- Do not use defaultfor to choose the only existing provider [\#672](https://github.com/voxpupuli/puppet-rabbitmq/pull/672) ([mbaldessari](https://github.com/mbaldessari))
+- regenerate puppet-strings docs [\#667](https://github.com/voxpupuli/puppet-rabbitmq/pull/667) ([bastelfreak](https://github.com/bastelfreak))
+- Remove EOL operatingsystems [\#666](https://github.com/voxpupuli/puppet-rabbitmq/pull/666) ([ekohl](https://github.com/ekohl))
+- Update README to specify voxpupuli/archive dependency vs. staging [\#660](https://github.com/voxpupuli/puppet-rabbitmq/pull/660) ([wyardley](https://github.com/wyardley))
+
+## [v8.0.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v8.0.0) (2017-10-18)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v7.1.0...v8.0.0)
 
@@ -32,7 +216,6 @@ These should not affect the functionality of the module.
 - use correct datatype for port param in README.md [\#652](https://github.com/voxpupuli/puppet-rabbitmq/pull/652) ([bastelfreak](https://github.com/bastelfreak))
 - Make ldap\_user\_dn\_pattern optional [\#645](https://github.com/voxpupuli/puppet-rabbitmq/pull/645) ([sfhardman](https://github.com/sfhardman))
 - Add tags to metadata [\#643](https://github.com/voxpupuli/puppet-rabbitmq/pull/643) ([wyardley](https://github.com/wyardley))
-- 7.1.0 release [\#642](https://github.com/voxpupuli/puppet-rabbitmq/pull/642) ([wyardley](https://github.com/wyardley))
 
 ## [v7.1.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v7.1.0) (2017-10-03)
 
@@ -51,11 +234,10 @@ These should not affect the functionality of the module.
 
 - Switch back to "include foo" \(without leading colons\) syntax [\#639](https://github.com/voxpupuli/puppet-rabbitmq/pull/639) ([wyardley](https://github.com/wyardley))
 - Lower required Puppet version from 4.8.0 to 4.7.1 [\#637](https://github.com/voxpupuli/puppet-rabbitmq/pull/637) ([wyardley](https://github.com/wyardley))
-- 7.0.0 release [\#633](https://github.com/voxpupuli/puppet-rabbitmq/pull/633) ([wyardley](https://github.com/wyardley))
 
 ## [v7.0.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v7.0.0) (2017-09-14)
 
-[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v6.0.0...v7.0.0)
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v5.6.1...v7.0.0)
 
 **Breaking changes:**
 
@@ -71,21 +253,8 @@ These should not affect the functionality of the module.
 
 **Fixed bugs:**
 
-- Extra newline in SSL section of rabbitmq.config [\#634](https://github.com/voxpupuli/puppet-rabbitmq/issues/634)
-- Idempotency problems with rabbitmq 3.6.5 and puppet 4.8.2 [\#618](https://github.com/voxpupuli/puppet-rabbitmq/issues/618)
-- Enabling new plugin fails [\#566](https://github.com/voxpupuli/puppet-rabbitmq/issues/566)
-- Rabbitmq\_user\_permissions parser fails for empty string [\#172](https://github.com/voxpupuli/puppet-rabbitmq/issues/172)
-- Error on using puppet resource rabbitmq\_user [\#147](https://github.com/voxpupuli/puppet-rabbitmq/issues/147)
 - Resolve issue with "puppet resource rabbitmq\_user" failing \(\#147\) [\#629](https://github.com/voxpupuli/puppet-rabbitmq/pull/629) ([wyardley](https://github.com/wyardley))
 - Switch back to using rabbitmq-plugins from system path \(\#566\) [\#570](https://github.com/voxpupuli/puppet-rabbitmq/pull/570) ([wyardley](https://github.com/wyardley))
-
-**Closed issues:**
-
-- Add support for max-length-bytes as a integer [\#557](https://github.com/voxpupuli/puppet-rabbitmq/issues/557)
-- 'provider rabbitmqplugins not functional on this host' [\#150](https://github.com/voxpupuli/puppet-rabbitmq/issues/150)
-- Doesn't require curl, fails when it isn't installed [\#145](https://github.com/voxpupuli/puppet-rabbitmq/issues/145)
-- EPEL RPM does not install /usr/sbin/rabbitmq-plugins [\#134](https://github.com/voxpupuli/puppet-rabbitmq/issues/134)
-- Parameter config\_mirrored\_queues has no effect [\#125](https://github.com/voxpupuli/puppet-rabbitmq/issues/125)
 
 **Merged pull requests:**
 
@@ -94,6 +263,26 @@ These should not affect the functionality of the module.
 - Add back a few examples removed in \#562 [\#625](https://github.com/voxpupuli/puppet-rabbitmq/pull/625) ([wyardley](https://github.com/wyardley))
 - Update 'require' statements and mock types to fix spec tests [\#620](https://github.com/voxpupuli/puppet-rabbitmq/pull/620) ([wyardley](https://github.com/wyardley))
 - Update fixtures to voxpupuli/archive \(from puppet-community\) [\#619](https://github.com/voxpupuli/puppet-rabbitmq/pull/619) ([wyardley](https://github.com/wyardley))
+
+## [v5.6.1](https://github.com/voxpupuli/puppet-rabbitmq/tree/v5.6.1) (2017-09-14)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-rabbitmq/compare/v6.0.0...v5.6.1)
+
+**Fixed bugs:**
+
+- Extra newline in SSL section of rabbitmq.config [\#634](https://github.com/voxpupuli/puppet-rabbitmq/issues/634)
+- Idempotency problems with rabbitmq 3.6.5 and puppet 4.8.2 [\#618](https://github.com/voxpupuli/puppet-rabbitmq/issues/618)
+- Enabling new plugin fails [\#566](https://github.com/voxpupuli/puppet-rabbitmq/issues/566)
+- Rabbitmq\_user\_permissions parser fails for empty string [\#172](https://github.com/voxpupuli/puppet-rabbitmq/issues/172)
+- Error on using puppet resource rabbitmq\_user [\#147](https://github.com/voxpupuli/puppet-rabbitmq/issues/147)
+
+**Closed issues:**
+
+- Add support for max-length-bytes as a integer [\#557](https://github.com/voxpupuli/puppet-rabbitmq/issues/557)
+- 'provider rabbitmqplugins not functional on this host' [\#150](https://github.com/voxpupuli/puppet-rabbitmq/issues/150)
+- Doesn't require curl, fails when it isn't installed [\#145](https://github.com/voxpupuli/puppet-rabbitmq/issues/145)
+- EPEL RPM does not install /usr/sbin/rabbitmq-plugins [\#134](https://github.com/voxpupuli/puppet-rabbitmq/issues/134)
+- Parameter config\_mirrored\_queues has no effect [\#125](https://github.com/voxpupuli/puppet-rabbitmq/issues/125)
 
 ## [v6.0.0](https://github.com/voxpupuli/puppet-rabbitmq/tree/v6.0.0) (2017-09-07)
 
@@ -134,7 +323,7 @@ These should not affect the functionality of the module.
 - \[Bugfix\] convert $ssl\_depth from string to integer [\#539](https://github.com/voxpupuli/puppet-rabbitmq/pull/539) ([bastelfreak](https://github.com/bastelfreak))
 - Extend rabbitmqadmin config template with SSL options. [\#526](https://github.com/voxpupuli/puppet-rabbitmq/pull/526) ([justahero](https://github.com/justahero))
 - \[MODULES-4223\] don't set NODE\_PORT and NODE\_IP\_ADDRESS if ssl\_only [\#524](https://github.com/voxpupuli/puppet-rabbitmq/pull/524) ([JAORMX](https://github.com/JAORMX))
-- \[MODULES-3733\] rabbitmq provider env\_path does not locate ruby gem installed puppet binary [\#517](https://github.com/voxpupuli/puppet-rabbitmq/pull/517) ([nzverev](https://github.com/nzverev))
+- \[MODULES-3733\] rabbitmq provider env\_path does not locate ruby gem installed puppet binary [\#517](https://github.com/voxpupuli/puppet-rabbitmq/pull/517) ([lowstorage](https://github.com/lowstorage))
 
 **Closed issues:**
 
@@ -155,7 +344,6 @@ These should not affect the functionality of the module.
 
 - Replace 'anchor's with 'contain' in server.pp [\#616](https://github.com/voxpupuli/puppet-rabbitmq/pull/616) ([alexjfisher](https://github.com/alexjfisher))
 - Switch to 'contain' vs. anchor pattern, and use Class\['foo'\] vs Class\['::foo'\] [\#613](https://github.com/voxpupuli/puppet-rabbitmq/pull/613) ([wyardley](https://github.com/wyardley))
-- Updates for 6.0.0 release [\#612](https://github.com/voxpupuli/puppet-rabbitmq/pull/612) ([wyardley](https://github.com/wyardley))
 - Fix typo \(.git =\> .github\) in README link [\#608](https://github.com/voxpupuli/puppet-rabbitmq/pull/608) ([wyardley](https://github.com/wyardley))
 - Update README, and remove old CONTRIBUTING.md [\#607](https://github.com/voxpupuli/puppet-rabbitmq/pull/607) ([wyardley](https://github.com/wyardley))
 - Ignore remaining multiple expectations warnings [\#602](https://github.com/voxpupuli/puppet-rabbitmq/pull/602) ([wyardley](https://github.com/wyardley))
@@ -220,7 +408,6 @@ These should not affect the functionality of the module.
 - \(MODULES-3983\) Update parallel\_tests for ruby 2.0.0 moduleSync [\#514](https://github.com/voxpupuli/puppet-rabbitmq/pull/514) ([pmcmaw](https://github.com/pmcmaw))
 - \[FM-5719\] Release prep for unsupported release 5.6.0 [\#513](https://github.com/voxpupuli/puppet-rabbitmq/pull/513) ([wilson208](https://github.com/wilson208))
 - set $real\_package\_source to undef instead of empty [\#507](https://github.com/voxpupuli/puppet-rabbitmq/pull/507) ([bastelfreak](https://github.com/bastelfreak))
-- Release 5.5.0 [\#503](https://github.com/voxpupuli/puppet-rabbitmq/pull/503) ([eputnam](https://github.com/eputnam))
 - Update modulesync\_config \[a3fe424\] [\#501](https://github.com/voxpupuli/puppet-rabbitmq/pull/501) ([DavidS](https://github.com/DavidS))
 - use unless instead of if, and empty? instead of !='' [\#491](https://github.com/voxpupuli/puppet-rabbitmq/pull/491) ([wyardley](https://github.com/wyardley))
 
@@ -480,7 +667,7 @@ the README for more information on how to configure this.
 - exchanges no longer recreated on each puppet run if non-default vhost is used
 - Allow port to be UNSET
 - Re-added rabbitmq::server class
-- Deprecated previously unused manage\_service variable in favor of 
+- Deprecated previously unused manage\_service variable in favor of
   service\_manage
 - Use correct key for rabbitmq apt::source
 - config\_mirrored\_queues variable removed
@@ -573,4 +760,4 @@ not use this class directly, only via the main rabbitmq class.
 - Initial Release.  Manage the package, file and service.
 
 
-\* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
+\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*

@@ -1,4 +1,6 @@
+# Install rabbitmq admin
 #
+# @api private
 class rabbitmq::install::rabbitmqadmin {
 
   if $rabbitmq::rabbitmqadmin_package {
@@ -7,7 +9,6 @@ class rabbitmq::install::rabbitmqadmin {
       name   => $rabbitmq::rabbitmqadmin_package,
     }
   } else {
-    require archive
 
     $python_package = $rabbitmq::params::python_package
     # Some systems (e.g., Ubuntu 16.04) don't ship Python 2 by default
@@ -29,12 +30,13 @@ class rabbitmq::install::rabbitmqadmin {
     $default_user = $rabbitmq::default_user
     $default_pass = $rabbitmq::default_pass
     $management_ip_address = $rabbitmq::management_ip_address
+    $archive_options = $rabbitmq::archive_options
 
     if !($management_ip_address) {
       # Pull from localhost if we don't have an explicit bind address
       $curl_prefix = ''
       $sanitized_ip = '127.0.0.1'
-    } elsif is_ipv6_address($management_ip_address) {
+    } elsif $management_ip_address =~ Stdlib::Compat::Ipv6 {
       $curl_prefix  = "--noproxy ${management_ip_address} -g -6"
       $sanitized_ip = join(enclose_ipv6(any2array($management_ip_address)), ',')
     } else {
@@ -42,17 +44,21 @@ class rabbitmq::install::rabbitmqadmin {
       $sanitized_ip = $management_ip_address
     }
 
+    if !($rabbitmq::use_config_file_for_plugins) {
+      $rabbitmqadmin_archive_require = [Class['rabbitmq::service'], Rabbitmq_plugin['rabbitmq_management']]
+    } else {
+      $rabbitmqadmin_archive_require = [Class['rabbitmq::service'], File['enabled_plugins']]
+    }
+
     archive { 'rabbitmqadmin':
-      path           => "${rabbitmq::rabbitmq_home}/rabbitmqadmin",
-      source         => "${protocol}://${sanitized_ip}:${management_port}/cli/rabbitmqadmin",
-      username       => $default_user,
-      password       => $default_pass,
-      allow_insecure => true,
-      cleanup        => false,
-      require        => [
-        Class['rabbitmq::service'],
-        Rabbitmq_plugin['rabbitmq_management']
-      ],
+      path             => "${rabbitmq::rabbitmq_home}/rabbitmqadmin",
+      source           => "${protocol}://${sanitized_ip}:${management_port}/cli/rabbitmqadmin",
+      username         => $default_user,
+      password         => $default_pass,
+      allow_insecure   => true,
+      download_options => $archive_options,
+      cleanup          => false,
+      require          => $rabbitmqadmin_archive_require,
     }
 
     file { '/usr/local/bin/rabbitmqadmin':
